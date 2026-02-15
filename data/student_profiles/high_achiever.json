@@ -1,0 +1,22 @@
+{
+    "student_id": "STU-2024-002",
+    "name": "Sarah Connor",
+    "major": "Data Science",
+    "year": 3,
+    "gpa": 3.9,
+    "academic_standing": "Dean's List",
+    "courses": {
+        "CS301": {
+            "name": "Advanced AI",
+            "grade": "A",
+            "attendance": "98%",
+            "midterm_score": 95
+        },
+        "MATH301": {
+            "name": "Statistics II",
+            "grade": "A-",
+            "attendance": "92%",
+            "midterm_score": 88
+        }
+    }
+}

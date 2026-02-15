@@ -1,0 +1,22 @@
+{
+    "student_id": "STU-2024-001",
+    "name": "Chibuikem",
+    "major": "Computer Science",
+    "year": 2,
+    "gpa": 2.4,
+    "academic_standing": "Probation",
+    "courses": {
+        "CS101": {
+            "name": "Intro to Algorithms",
+            "grade": "D",
+            "attendance": "60%",
+            "midterm_score": 45
+        },
+        "MATH201": {
+            "name": "Linear Algebra",
+            "grade": "B",
+            "attendance": "85%",
+            "midterm_score": 78
+        }
+    }
+}
