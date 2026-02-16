@@ -1,5 +1,5 @@
 import os
-import shutil  # <--- NEW IMPORT for deleting folders
+import shutil
 import streamlit as st
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,21 +11,31 @@ DB_PATH = "vector_store/"
 
 def ingest_new_files(uploaded_files):
     """
-    Accepts a list of Streamlit UploadedFile objects, saves them,
-    and rebuilds the Vector Database.
+    1. WIPES the old database.
+    2. Processes new files.
+    3. Creates a fresh database.
     """
-    # 1. Robust API Key Retrieval
+    # --- STEP 1: NUCLEAR WIPE (Do this first!) ---
+    if os.path.exists(DB_PATH):
+        try:
+            shutil.rmtree(DB_PATH)
+            print("💥 Old database deleted successfully.")
+        except Exception as e:
+            return f"❌ Error deleting old brain: {e}"
+    # ---------------------------------------------
+
+    # 2. Get API Key
     api_key = os.getenv("GOOGLE_API_KEY") 
     if not api_key:
         try:
             api_key = st.secrets["GOOGLE_API_KEY"]
         except:
-            return "❌ Error: Google API Key not found. Please check Streamlit Secrets."
+            return "❌ Error: Google API Key not found. Check Streamlit Secrets."
 
-    # 2. Save Uploaded Files to a Temp Directory
+    # 3. Save Uploaded Files to Temp
     temp_dir = "data/uploaded_books"
     if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir) # Clean up old temp files
+        shutil.rmtree(temp_dir)
     os.makedirs(temp_dir, exist_ok=True)
     
     saved_paths = []
@@ -35,7 +45,7 @@ def ingest_new_files(uploaded_files):
             f.write(uploaded_file.getbuffer())
         saved_paths.append(file_path)
     
-    # 3. Load and Process PDFs
+    # 4. Load PDFs
     documents = []
     for path in saved_paths:
         try:
@@ -47,17 +57,11 @@ def ingest_new_files(uploaded_files):
     if not documents:
         return "No valid text found in PDFs."
 
-    # 4. Split Text
+    # 5. Split Text & Rebuild Brain
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     texts = text_splitter.split_documents(documents)
 
-    # 5. Create/Overwrite Vector DB
     try:
-        # --- NUCLEAR FIX: DELETE OLD BRAIN FIRST ---
-        if os.path.exists(DB_PATH):
-            shutil.rmtree(DB_PATH)  # Deletes the folder completely
-        # -------------------------------------------
-
         embeddings = GoogleGenerativeAIEmbeddings(
             model="models/gemini-embedding-001", 
             google_api_key=api_key 
@@ -67,4 +71,4 @@ def ingest_new_files(uploaded_files):
     except Exception as e:
         return f"❌ AI Error: {str(e)}"
     
-    return f"✅ Successfully processed {len(saved_paths)} file(s)! The old brain was wiped."
+    return f"✅ SUCCESS! Old brain wiped. Learned {len(saved_paths)} new file(s)."
