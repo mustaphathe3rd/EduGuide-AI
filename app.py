@@ -53,10 +53,27 @@ with st.sidebar:
     st.title("🎓 EduGuide Settings")
     
     st.subheader("👤 Student Profile")
-    profile_files = get_all_profiles()
-    selected_file = st.selectbox("Active Student:", profile_files) if profile_files else None
     
-    if selected_file:
+    # Get all files
+    profile_files = get_all_profiles()
+    
+    if profile_files:
+        # NEW LOGIC: Create a mapping of {filename: Student Name}
+        file_to_name = {}
+        for file in profile_files:
+            file_path = os.path.join("data/student_profiles", file)
+            profile_data = load_student_profile(file_path)
+            # Use the name from the JSON, or fallback to filename if missing
+            file_to_name[file] = profile_data.get("name", file)
+
+        # Update Selectbox to show names, but return the filename
+        selected_file = st.selectbox(
+            "Active Student:", 
+            options=profile_files,
+            format_func=lambda x: file_to_name.get(x, x) # <--- This handles the display
+        )
+
+        # Load the selected profile logic (Same as before)
         profile_path = os.path.join("data/student_profiles", selected_file)
         student_data = load_student_profile(profile_path)
         formatted_profile = format_profile_for_ai(student_data)
@@ -71,7 +88,9 @@ with st.sidebar:
             st.error(f"⚠ {status}")
         else:
             st.success(f"✅ {status}")
+            
     else:
+        st.error("No profiles found!")
         formatted_profile = ""
 
     st.divider()
